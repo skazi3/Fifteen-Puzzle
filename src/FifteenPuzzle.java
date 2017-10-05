@@ -5,7 +5,7 @@ import java.util.Timer;
 import javax.swing.*;
 
 public class FifteenPuzzle extends JFrame implements ActionListener{
-
+	//private variables that will be used throughout the class
 	private GridLayout puzzleGrid;
 	private ArrayList<MyButton> buttons;
 	private Container container;
@@ -18,14 +18,17 @@ public class FifteenPuzzle extends JFrame implements ActionListener{
    public FifteenPuzzle()
    {
       super("Fifteen Puzzle");
+      //this sets up the initial GUI with container
       puzzleGrid = new GridLayout(4,4,1,1);
       container = getContentPane();
       container.setLayout(puzzleGrid);
       //stack keeps track of indices of the button last clicked I.e. the previous move
       index = new Stack<Integer>();
+      //this holds the solved puzzle arrangement
       solvedPuzzle = new ArrayList<MyButton>();
       //set number of moves to 0
       noMoves = 0;
+      //add menu
       setJMenuBar(addMenu());
       
       buttons = getButtons();
@@ -34,6 +37,7 @@ public class FifteenPuzzle extends JFrame implements ActionListener{
       
       
    } 
+   //function to initialize buttons array
    private ArrayList<MyButton> getButtons(){
 	  ArrayList<MyButton> buttons = new ArrayList<MyButton>(16);
 	      
@@ -52,6 +56,7 @@ public class FifteenPuzzle extends JFrame implements ActionListener{
       return buttons;
    }
 @Override
+	//action listener for the buttons
    public void actionPerformed(ActionEvent e) {
 	ArrayList<MyButton> positions = new ArrayList<MyButton>(4);
 	MyButton left, right, top, down;
@@ -61,6 +66,7 @@ public class FifteenPuzzle extends JFrame implements ActionListener{
 	MyButton temp = (MyButton) e.getSource();
 	MyButton empty = (MyButton) e.getSource();
 
+	//this will loop through and check if the button clicked is indeed next to an empty button
 	for(int j = 0; j < 16; j++) {
 		if(buttons.get(j).getText() == " ") {
 			empty = buttons.get(j);
@@ -86,14 +92,16 @@ public class FifteenPuzzle extends JFrame implements ActionListener{
 			}
 		}
 	}
+	//swaps if the button clicked is valid
 	if(positions.contains(empty)) {
 		swapButtons(buttons, originalIndex, emptyIndex, e.getActionCommand());
 		noMoves++;
 		index.add(emptyIndex);
 	}
-	//System.out.println("Index on stack: " + index.peek() + "\n");
+
 
 }
+//adds menu bar and action listeners for it
 private JMenuBar addMenu() {
 	   JMenuBar menuBar;
 	   JMenu menu, subActionsMenu;
@@ -168,7 +176,7 @@ private JMenuBar addMenu() {
 	   });
 	   solveMenuItem.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
-		    	solvePuzzle();
+		    	solvePuzzle(buttons);
 		    }
 	   });
 	   
@@ -179,6 +187,7 @@ private JMenuBar addMenu() {
 	   return menuBar;
 	   
 }
+//shuffles the buttons
 	private void shuffle() {
 		Collections.shuffle(buttons);
 		swapButtons(buttons, 15, findEmptySpot(buttons), buttons.get(15).getActionCommand());
@@ -188,6 +197,7 @@ private JMenuBar addMenu() {
     		}
     		layoutButtons();
 	}
+	//undoes all the moves
 	private void undoAll(JMenuItem undoPrev) {
 		Timer t = new Timer();
 		
@@ -203,19 +213,17 @@ private JMenuBar addMenu() {
  	    t.scheduleAtFixedRate(repeatedTask, 0, 1000);
 
 	}
+	//undoes only the previous one
 	private void undoPrev() {
 		int origIndex, emptyIndex;
     		if(noMoves != 0) {
 		    	origIndex = index.pop();
 		    	emptyIndex = findEmptySpot(buttons);
 		    	swapButtons(buttons, origIndex, emptyIndex, buttons.get(origIndex).getActionCommand());
-		    
-		    	
-		    	System.out.println("orig index " + origIndex + "emptyindex " + emptyIndex + "string of button :" +  buttons.get(origIndex).getActionCommand());
-		    	noMoves--;
+	
     		} 
 	}
-	
+	//main function
    public static void main( String args[] )
    { 
       FifteenPuzzle app = new FifteenPuzzle();
@@ -251,7 +259,7 @@ private JMenuBar addMenu() {
 	   else
 		   return false;
    }
-   
+   //repaints the board after shuffle
    public void layoutButtons() {
 	   container.removeAll();
        for(MyButton b: buttons) {
@@ -261,6 +269,7 @@ private JMenuBar addMenu() {
        container.revalidate();
        container.repaint();
    }
+   //method to find empty index
    private int findEmptySpot(ArrayList<MyButton>buttons) {
 	   for(int i = 0; i < N; i++) {
 		   if(buttons.get(i).isEnabled() == false) {
@@ -269,9 +278,11 @@ private JMenuBar addMenu() {
 	   }
 	   return -1;
    }
+   //method to get int representation of button
    private int convertToInt(MyButton b) {
 	   return Integer.parseInt(b.getActionCommand());
    }
+   //method to swap two buttons given indices of clicked button and empty spot
    private ArrayList<MyButton> swapButtons(ArrayList<MyButton> b, int origIndex, int emptyIndex, String origText) {
 	   	b.get(origIndex).setText(" ");
 		b.get(origIndex).setEnabled(false);
@@ -279,6 +290,7 @@ private JMenuBar addMenu() {
 		b.get(emptyIndex).setEnabled(true);
 		return b;
    }
+   //grabs the adjacent neighbors of the empty button
    private ArrayList<MyButton> getNeighbors(){
 	   ArrayList<MyButton> neighbors = new ArrayList<MyButton>();
 	   int emptyIndex = findEmptySpot(buttons);
@@ -294,10 +306,6 @@ private JMenuBar addMenu() {
 				   neighbors.add(buttons.get(i+1));
 		   }
 	   }
-//	   System.out.println("Neighbors: ");
-//	   for(int i = 0; i < neighbors.size(); i++) {
-//		   System.out.println(neighbors.get(i).getActionCommand() + "\n");
-//	   }
 	   return neighbors;
    }
    @SuppressWarnings("unused")
@@ -309,7 +317,23 @@ private int findIndex(ArrayList<MyButton> puzzle, MyButton b) {
 	   }
 	   return -1;
    }
-   private void solvePuzzle() {
+   private void solvePuzzle(ArrayList<MyButton> puzzle) {
+	   Queue<Tuple> queue = new PriorityQueue<Tuple>();
+	   Set<ArrayList<MyButton>> visitedSet = new HashSet<ArrayList<MyButton>>();
+	   
+	   queue.add(new Tuple(puzzle, null));
+	   visitedSet.add(puzzle);
+	   
+	   while(queue.isEmpty() == false) {
+		   Tuple cur = queue.remove();
+		   if(cur.isSolved(puzzle)) {
+			   System.out.println("Solved!\n");
+			   break;
+		   }
+		   else {
+			   ArrayList<MyButton> neighbors = getNeighbors();
+		   }
+	   }
 	   
 	   
    }
