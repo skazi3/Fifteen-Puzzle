@@ -333,11 +333,13 @@ private int findIndex(ArrayList<MyButton> puzzle, MyButton b) {
 
 	   while(queue.isEmpty() == false) {
 		   Tuple cur = queue.remove();
+		   
 		   for(int j = 0; j < N; j++) {
 				  System.out.println(cur.getPuzzle().get(j).getActionCommand() + ", ");
 		   }
 		   System.out.println("DONE\n");
 		   if(cur.isSolved(solvedPuzzle)) {
+
 			   System.out.println("Solved!!!\n");
 			   break;
 		   }
