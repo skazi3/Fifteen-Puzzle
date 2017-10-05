@@ -291,19 +291,19 @@ private JMenuBar addMenu() {
 		return b;
    }
    //grabs the adjacent neighbors of the empty button
-   private ArrayList<MyButton> getNeighbors(){
+   private ArrayList<MyButton> getNeighbors(ArrayList<MyButton> b){
 	   ArrayList<MyButton> neighbors = new ArrayList<MyButton>();
-	   int emptyIndex = findEmptySpot(buttons);
+	   int emptyIndex = findEmptySpot(b);
 	   for(int i = 0; i < N; i++) {
 		   if(i == emptyIndex) {
 			   if(i+4 < 16)
-				   neighbors.add(buttons.get(i+4));
+				   neighbors.add(b.get(i+4));
 			   if(i-4 >= 0)
-				   neighbors.add(buttons.get(i-4));
+				   neighbors.add(b.get(i-4));
 			   if(i-1 >= 0 && i != 0 && i != 4 && i != 8 && i != 12)
-				   neighbors.add(buttons.get(i-1));
+				   neighbors.add(b.get(i-1));
 			   if(i+1 < 16 && i != 3 && i != 7 && i != 11 && i != 15)
-				   neighbors.add(buttons.get(i+1));
+				   neighbors.add(b.get(i+1));
 		   }
 	   }
 	   return neighbors;
@@ -333,12 +333,16 @@ private int findIndex(ArrayList<MyButton> puzzle, MyButton b) {
 
 	   while(queue.isEmpty() == false) {
 		   Tuple cur = queue.remove();
+		   for(int j = 0; j < N; j++) {
+				  System.out.println(cur.getPuzzle().get(j).getActionCommand() + ", ");
+		   }
+		   System.out.println("DONE\n");
 		   if(cur.isSolved(solvedPuzzle)) {
-			   System.out.println("Solved!\n");
+			   System.out.println("Solved!!!\n");
 			   break;
 		   }
 		   else {
-			   neighbors = getNeighbors();
+			   neighbors = getNeighbors(cur.getPuzzle());
 			   for(int i = 0; i < neighbors.size(); i++) {
 
 				   swapToSolve(cur.getPuzzle(), cur.findIndex(neighbors.get(i)), cur.findIndex(empty));
@@ -355,9 +359,7 @@ private int findIndex(ArrayList<MyButton> puzzle, MyButton b) {
 					   else {
 						   m = cur.getMovement();
 						   m.add(cur.findIndex(neighbors.get(i)));
-						   
 					   }
-
 					   queue.add(new Tuple(R, m));
 					   visitedSet.add(R);
 					   swapToSolve(cur.getPuzzle(), cur.findIndex(neighbors.get(i)), cur.findIndex(empty));
