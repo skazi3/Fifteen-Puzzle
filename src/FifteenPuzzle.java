@@ -317,22 +317,57 @@ private int findIndex(ArrayList<MyButton> puzzle, MyButton b) {
 	   }
 	   return -1;
    }
+   private ArrayList<MyButton> swapToSolve(ArrayList<MyButton> b, int i, int j){
+	   Collections.swap(b, i, j);
+	   return b;
+   }
    private void solvePuzzle(ArrayList<MyButton> puzzle) {
-	   Queue<Tuple> queue = new PriorityQueue<Tuple>();
+	   Queue<Tuple> queue = new LinkedList<Tuple>();
 	   Set<ArrayList<MyButton>> visitedSet = new HashSet<ArrayList<MyButton>>();
-	   
+	   ArrayList<MyButton> R;
+	   ArrayList<MyButton> neighbors;
+	   MyButton empty = puzzle.get(findEmptySpot(puzzle));
 	   queue.add(new Tuple(puzzle, null));
 	   visitedSet.add(puzzle);
-	   
+	   System.out.println("Puzzle:");
+
 	   while(queue.isEmpty() == false) {
 		   Tuple cur = queue.remove();
-		   if(cur.isSolved(puzzle)) {
+		   if(cur.isSolved(solvedPuzzle)) {
 			   System.out.println("Solved!\n");
 			   break;
 		   }
 		   else {
-			   ArrayList<MyButton> neighbors = getNeighbors();
+			   neighbors = getNeighbors();
+			   for(int i = 0; i < neighbors.size(); i++) {
+
+				   swapToSolve(cur.getPuzzle(), cur.findIndex(neighbors.get(i)), cur.findIndex(empty));
+				   R = cur.getPuzzle();
+//				   for(int j = 0; j < N; j++) {
+//						  System.out.println(cur.getPuzzle().get(j).getActionCommand() + ", ");
+//				   }
+				   if(visitedSet.contains(R) == false) {
+					   ArrayList<Integer> m;
+					   if(cur.getMovement() == null) {
+						   m = new ArrayList<Integer>();
+						   m.add(cur.findIndex(neighbors.get(i)));
+					   }
+					   else {
+						   m = cur.getMovement();
+						   m.add(cur.findIndex(neighbors.get(i)));
+						   
+					   }
+
+					   queue.add(new Tuple(R, m));
+					   visitedSet.add(R);
+					   swapToSolve(cur.getPuzzle(), cur.findIndex(neighbors.get(i)), cur.findIndex(empty));
+				   }
+			   }
 		   }
+	   }
+	
+	   if(queue.isEmpty()) {
+		   System.out.println("Queue is empty\n");
 	   }
 	   
 	   
